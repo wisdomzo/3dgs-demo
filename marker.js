@@ -3,15 +3,27 @@ import * as THREE from 'three';
 /**
  * 初始化现代感控件：双层发光球体
  * @param {THREE.Scene} scene - 场景对象
+ * @param {THREE.Vector3 | {x: number, y: number, z: number}} [position=new THREE.Vector3(0,0,0)] - 可选，marker初始位置，默认(0,0,0)
  * @returns {THREE.Group} - 返回 markerGroup 引用以便后续操作
  */
-export function initMarker(scene) {
+export function initMarker(scene, position = new THREE.Vector3(0, 0, 0)) {
     const markerGroup = new THREE.Group();
-    markerGroup.position.set(0, 0, 0); 
+    
+    // 处理传入的位置参数：兼容 Vector3 和普通对象格式
+    if (position instanceof THREE.Vector3) {
+        markerGroup.position.copy(position);
+    } else if (typeof position === 'object' && position.x !== undefined) {
+        markerGroup.position.set(position.x, position.y, position.z);
+    }
+    // 兜底：如果参数格式错误，仍设为(0,0,0)
+    else {
+        markerGroup.position.set(0, 0, 0);
+    }
+
     markerGroup.name = "myClickableControl";
     const markerGroupColor = new THREE.Color("#ff6f00");
 
-    // 1. 中心核心球体
+    // 1. 中心核心球体（位置相对Group，无需修改）
     const core = new THREE.Mesh(
         new THREE.SphereGeometry(4, 32, 32),
         new THREE.MeshBasicMaterial({ color: markerGroupColor, transparent: true, opacity: 0.9 })
@@ -19,7 +31,7 @@ export function initMarker(scene) {
     core.name = "marker_core";
     markerGroup.add(core);
 
-    // 2. 扩散球壳逻辑
+    // 2. 扩散球壳逻辑（位置相对Group，无需修改）
     const shellCount = 3;
     const shellGeo = new THREE.SphereGeometry(2, 32, 32); 
 

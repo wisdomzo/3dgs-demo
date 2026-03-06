@@ -7,7 +7,7 @@ import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
  */
 export function initSkybox(scene) {
     // 1. 定义半径
-    const sphereRadius = 900; 
+    const sphereRadius = 300; 
     
     // 2. 创建球体几何体
     const sphereGeo = new THREE.SphereGeometry(sphereRadius, 64, 64);
@@ -21,7 +21,7 @@ export function initSkybox(scene) {
     const worldSphere = new THREE.Mesh(sphereGeo, sphereMat);
     
     // 4. 指定球体中心位置
-    worldSphere.position.set(-120, 30, 0); 
+    worldSphere.position.set(0, 0, 0); 
     scene.add(worldSphere);
 
     // 5. 异步加载 EXR 贴图

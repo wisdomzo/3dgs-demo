@@ -36,7 +36,9 @@ function togglePersonUI(visible) {
 initSkybox(scene);
 
 // --- 创建可点击的 3D 控件 ---
-const markerGroup = initMarker(scene);
+// 瞬移球1
+const targetPos1 = new THREE.Vector3(3, 0, 0);
+const markerGroup1 = initMarker(scene, targetPos1);
 
 
 
@@ -57,13 +59,13 @@ document.body.appendChild(renderer.domElement);
 
 // --- 高空俯瞰相机 (Camera 1) ---
 const camera1 = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 150000);
-camera1.position.set(300, 700, -150); // 放置在高空
+camera1.position.set(0, 0, 200); // 放置在高空
 // 允许自由旋转的控制器
 const controls1 = new OrbitControls(camera1, renderer.domElement);
 controls1.enabled = false;
 // 限制缩放（距离场景中心的远近）
 controls1.minDistance = 100;   // 相机最近能拉多近（防止穿进地里）
-controls1.maxDistance = 800; // 相机最远能拉多远（必须小于盒子半径 5000）
+controls1.maxDistance = 300; // 相机最远能拉多远（必须小于盒子半径 5000）
 controls1.minPolarAngle = 0;
 controls1.maxPolarAngle = Math.PI / 4;
 controls1.enablePan = false;
@@ -73,14 +75,10 @@ controls1.enableDamping = true; // 增加旋转的平滑感
 // --- 数字人相机 (Camera 2) ---
 const camera2 = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 // 初始位置可以设为 marker 的位置
-camera2.position.set(0, playerHeight, 0);
+camera2.position.set(targetPos1.x, targetPos1.y + playerHeight, targetPos1.z);
 const camera2DefaultPos = camera2.position.clone();
 const camera2DefaultQuat = camera2.quaternion.clone();
 const camera2DefaultFov = camera2.fov;
-
-
-
-
 
 
 
@@ -148,7 +146,7 @@ function prepareCameraSwitch() {
     controls1.enabled = false;
     camera1.enabled = false;
     togglePersonUI(false);
-    scene.remove(markerGroup);
+    scene.remove(markerGroup1);
 }
 
 
@@ -183,12 +181,12 @@ btn2.addEventListener('pointerup', (event) => {
 const modelMatrix = new THREE.Matrix4(-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1);
 //const assetsBaseUrl = `${location.origin}/assets/digiCampus`;
 //const assetsBaseUrl = "./assets/digiCampus";
-const assetsBaseUrl = "https://pub-5b1001bb00a54146925791daab7472f5.r2.dev/digiCampus";
+const assetsBaseUrl = "https://pub-5b1001bb00a54146925791daab7472f5.r2.dev/homeEnvAll";
 const lccObject = LCCRender.load({
     camera: camera1,
     scene: scene,
     dataPath: {
-        meta: { url: `${assetsBaseUrl}/Digcampus.lcc` },
+        meta: { url: `${assetsBaseUrl}/homeEnvAll.lcc` },
         collision: { url: `${assetsBaseUrl}/collision.lci` },
         index: { url: `${assetsBaseUrl}/index.bin` },
         data: { url: `${assetsBaseUrl}/data.bin` },
@@ -263,7 +261,7 @@ function render() {
     LCCRender.setCamera(activeCamera);
     if (!isPersonView) {
         controls1.update(); 
-        updateMarker(markerGroup, time);
+        updateMarker(markerGroup1, time);
     } else {
         handlePersonMovement(delta);// 这里处理 WASD 和胶囊体碰撞
     }
@@ -447,7 +445,7 @@ function startEagleDive(movingCam, startCam, endCam) {
                 isPersonView = false;    // 这时候再切回俯瞰逻辑
                 controls1.enabled = true; // 重新启用控制器
                 camera1.enabled = true;
-                scene.add(markerGroup);
+                scene.add(markerGroup1);
                 movingCam.position.copy(camera2DefaultPos);
                 movingCam.quaternion.copy(camera2DefaultQuat);
                 movingCam.fov = camera2DefaultFov;
